@@ -1,0 +1,6 @@
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Arial, sans-serif; background: #f5f7fb; color: #111827; }
+.base-header { display: flex; justify-content: space-between; padding: 20px 8%; background: #fff; border-bottom: 1px solid #e5e7eb; }
+.base-container { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
+.base-card { background: #fff; padding: 32px; border-radius: 16px; border: 1px solid #e5e7eb; }
+.base-footer { padding: 24px; text-align: center; color: #64748b; }

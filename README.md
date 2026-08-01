@@ -1,12 +1,46 @@
-# Urban Tribe - Code base nhóm 4 thành viên
+# URBAN TRIBE - WEBSITE BÁN HÀNG THỜI TRANG
 
-Đây là bản khung để khởi tạo GitHub. Không đẩy ngay bản hoàn chỉnh lên nhánh `main`.
+Urban Tribe là dự án website bán hàng thời trang được xây dựng bằng PHP và MySQL.
 
-Thứ tự tích hợp đề xuất:
+Dự án hỗ trợ khách hàng xem sản phẩm, lựa chọn màu sắc, kích thước, thêm sản phẩm vào giỏ hàng, đặt hàng và thanh toán.
 
-1. Thành viên 1: tài khoản, phân quyền và layout dùng chung.
-2. Thành viên 2: danh mục, màu, kích thước và sản phẩm.
-3. Thành viên 3: giỏ hàng, đặt hàng và quản lý trạng thái đơn.
-4. Thành viên 4: bình luận, liên hệ, thống kê và ZaloPay Sandbox.
+## Chức năng khách hàng
 
-Xem các tài liệu ở thư mục gốc của gói bàn giao trước khi bắt đầu.
+- Đăng ký và đăng nhập tài khoản
+- Xem danh sách sản phẩm
+- Tìm kiếm và lọc sản phẩm
+- Xem chi tiết sản phẩm
+- Chọn màu sắc và kích thước
+- Thêm sản phẩm vào giỏ hàng
+- Cập nhật số lượng trong giỏ hàng
+- Đặt hàng
+- Thanh toán khi nhận hàng
+- Thanh toán qua ZaloPay Sandbox
+- Xem lịch sử đơn hàng
+- Hủy đơn hàng
+- Bình luận và đánh giá sản phẩm
+- Gửi thông tin liên hệ
+
+## Chức năng quản trị
+
+- Đăng nhập trang quản trị
+- Quản lý danh mục
+- Quản lý sản phẩm
+- Quản lý màu sắc và kích thước
+- Quản lý biến thể và số lượng tồn kho
+- Quản lý tài khoản người dùng
+- Quản lý đơn hàng
+- Cập nhật trạng thái đơn hàng
+- Quản lý bình luận
+- Quản lý phản hồi
+- Xem thống kê doanh thu
+- Xem sản phẩm bán chạy
+
+## Quy trình trạng thái đơn hàng
+
+```text
+Chờ xác nhận
+→ Đã xác nhận
+→ Đang giao
+→ Đã giao
+→ Hoàn thành

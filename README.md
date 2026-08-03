@@ -44,3 +44,17 @@ Chờ xác nhận
 → Đang giao
 → Đã giao
 → Hoàn thành
+
+## Thành viên thực hiện
+
+Dự án Urban Tribe được thực hiện bởi nhóm 4 thành viên:
+
+| STT | Thành viên | Phần phụ trách |
+|---|---|---|
+| 1 | Sơn | Trưởng nhóm, tài khoản, phân quyền và giao diện dùng chung |
+| 2 | Hoàng | Danh mục, màu sắc, kích thước và sản phẩm |
+| 3 | Nam | Giỏ hàng, đặt hàng và quản lý trạng thái đơn |
+| 4 | Hưng | Bình luận, liên hệ, thống kê và ZaloPay Sandbox |
+
+Các thành viên cùng tham gia kiểm thử, sửa lỗi, quản lý mã nguồn GitHub và hoàn thiện dự án.
+

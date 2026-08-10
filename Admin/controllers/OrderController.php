@@ -9,7 +9,8 @@ if (!hash_equals($_SESSION['_nam_admin_order_csrf'] ?? '', $_POST['csrf_token'] 
 $orderId = (int) ($_POST['order_id'] ?? 0);
 $status = $_POST['status'] ?? '';
 try {
-    (new OrderModel($conn))->updateStatus($orderId, $status);
+    $model = new OrderModel($conn);
+    $model->updateStatus($orderId, $status);
     $_SESSION['_nam_admin_order_flash'] = ['message' => 'Đã cập nhật trạng thái đơn hàng.', 'type' => 'success'];
 } catch (Throwable $error) {
     $_SESSION['_nam_admin_order_flash'] = ['message' => $error instanceof RuntimeException ? $error->getMessage() : 'Không thể cập nhật đơn hàng.', 'type' => 'error'];

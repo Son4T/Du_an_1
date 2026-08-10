@@ -38,8 +38,35 @@ class OrderModel
         } catch (Throwable $error) { $this->conn->rollback(); throw $error; }
     }
 
+    public function cancelPendingForUser(int $orderId, int $userId): void
+    {
+        $this->conn->begin_transaction();
+        try {
+            $statement = $this->conn->prepare('SELECT status FROM orders WHERE id = ? AND user_id = ? FOR UPDATE');
+            $statement->bind_param('ii', $orderId, $userId);
+            $statement->execute();
+            $order = $statement->get_result()->fetch_assoc();
+            if (!$order || $order['status'] !== 'pending') {
+                throw new RuntimeException('Chỉ có thể hủy đơn đang chờ xác nhận.');
+            }
+            $this->restoreStock($orderId);
+            $statement = $this->conn->prepare("UPDATE orders SET status = 'cancelled' WHERE id = ?");
+            $statement->bind_param('i', $orderId);
+            $statement->execute();
+            $this->conn->commit();
+        } catch (Throwable $error) {
+            $this->conn->rollback();
+            throw $error;
+        }
+    }
+
     public function statuses(): array { return ['pending','confirmed','shipping','delivered','success','cancelled']; }
+    public function nextStatuses(string $status): array
+    {
+        return ['pending'=>['confirmed','cancelled'],'confirmed'=>['shipping','cancelled'],
+            'shipping'=>['delivered'],'delivered'=>['success'],'success'=>[],'cancelled'=>[]][$status] ?? [];
+    }
     public function statusText(string $status): string { return ['pending'=>'Chờ xác nhận','confirmed'=>'Đã xác nhận','shipping'=>'Đang giao','delivered'=>'Đã giao','success'=>'Hoàn thành','cancelled'=>'Đã hủy'][$status] ?? $status; }
-    private function allowedTransition(string $from, string $to): bool { return in_array($to, ['pending'=>['confirmed','cancelled'],'confirmed'=>['shipping','cancelled'],'shipping'=>['delivered'],'delivered'=>['success'],'success'=>[],'cancelled'=>[]][$from] ?? [], true); }
+    private function allowedTransition(string $from, string $to): bool { return in_array($to, $this->nextStatuses($from), true); }
     private function restoreStock(int $orderId): void { $statement = $this->conn->prepare('SELECT variant_id, quantity FROM order_items WHERE order_id = ?'); $statement->bind_param('i', $orderId); $statement->execute(); foreach ($statement->get_result()->fetch_all(MYSQLI_ASSOC) as $item) { if ($item['variant_id']) { $update = $this->conn->prepare('UPDATE product_variants SET stock = stock + ? WHERE id = ?'); $update->bind_param('ii', $item['quantity'], $item['variant_id']); $update->execute(); } } }
 }

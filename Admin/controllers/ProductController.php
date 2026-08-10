@@ -62,6 +62,36 @@ function upload_product_image(string $oldImage = ''): string
     return 'public/uploads/products/' . $fileName;
 }
 
+function upload_variant_image(int $index, string $oldImage = ''): string
+{
+    if (empty($_FILES['variant_image']['name'][$index])) {
+        return $oldImage;
+    }
+
+    $file = [
+        'name' => $_FILES['variant_image']['name'][$index],
+        'type' => $_FILES['variant_image']['type'][$index],
+        'tmp_name' => $_FILES['variant_image']['tmp_name'][$index],
+        'error' => $_FILES['variant_image']['error'][$index],
+        'size' => $_FILES['variant_image']['size'][$index],
+    ];
+    if ($file['error'] !== UPLOAD_ERR_OK || $file['size'] > 5 * 1024 * 1024) {
+        throw new RuntimeException('Ảnh biến thể không hợp lệ hoặc lớn hơn 5MB.');
+    }
+    $mime = (new finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']);
+    $types = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+    if (!isset($types[$mime])) {
+        throw new RuntimeException('Ảnh biến thể chỉ nhận JPG, PNG hoặc WEBP.');
+    }
+    $folder = dirname(__DIR__) . '/public/uploads/products';
+    if (!is_dir($folder)) mkdir($folder, 0755, true);
+    $name = 'variant-' . bin2hex(random_bytes(12)) . '.' . $types[$mime];
+    if (!move_uploaded_file($file['tmp_name'], $folder . '/' . $name)) {
+        throw new RuntimeException('Không thể lưu ảnh biến thể.');
+    }
+    return 'public/uploads/products/' . $name;
+}
+
 $productModel = new ProductModel($conn);
 $action = $_POST['action'] ?? '';
 
@@ -159,6 +189,10 @@ try {
                 'sku' => $variantSku,
                 'price' => $variantPrice,
                 'stock' => $variantStock,
+                'image_url' => upload_variant_image(
+                    $index,
+                    trim($_POST['variant_existing_image'][$index] ?? '')
+                ),
             ];
         }
 

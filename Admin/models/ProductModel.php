@@ -62,20 +62,22 @@ class ProductModel
                     size_id,
                     sku,
                     price,
-                    stock
-                ) VALUES (?, ?, ?, ?, ?, ?)';
+                    stock,
+                    image_url
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)';
 
         $statement = $this->conn->prepare($sql);
 
         foreach ($variants as $variant) {
             $statement->bind_param(
-                'iiisdi',
+                'iiisdis',
                 $productId,
                 $variant['color_id'],
                 $variant['size_id'],
                 $variant['sku'],
                 $variant['price'],
-                $variant['stock']
+                $variant['stock'],
+                $variant['image_url']
             );
             $statement->execute();
         }
@@ -175,14 +177,15 @@ class ProductModel
     {
         $statement = $this->conn->prepare(
             'UPDATE product_variants
-             SET sku = ?, price = ?, stock = ?
+             SET sku = ?, price = ?, stock = ?, image_url = ?
              WHERE id = ?'
         );
         $statement->bind_param(
-            'sdii',
+            'sdisi',
             $variant['sku'],
             $variant['price'],
             $variant['stock'],
+            $variant['image_url'],
             $variantId
         );
         $statement->execute();
@@ -197,17 +200,19 @@ class ProductModel
                 size_id,
                 sku,
                 price,
-                stock
-             ) VALUES (?, ?, ?, ?, ?, ?)'
+                stock,
+                image_url
+             ) VALUES (?, ?, ?, ?, ?, ?, ?)'
         );
         $statement->bind_param(
-            'iiisdi',
+            'iiisdis',
             $productId,
             $variant['color_id'],
             $variant['size_id'],
             $variant['sku'],
             $variant['price'],
-            $variant['stock']
+            $variant['stock'],
+            $variant['image_url']
         );
         $statement->execute();
 

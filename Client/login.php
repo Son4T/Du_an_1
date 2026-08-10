@@ -13,7 +13,7 @@ $notice=flash('auth');
         Đăng nhập -
         <?= e(STORE_NAME) ?>
     </title>
-    <link href="style.css" rel="stylesheet" />
+    <link href="assets/css/store.css?v=20260810" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
 </head>
 

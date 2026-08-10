@@ -16,7 +16,7 @@ $notice=flash('client');
       - Thời trang phong cách
     </title>
     <meta content="Urban Tribe - cửa hàng thời trang trẻ trung, sản phẩm đa dạng và mua sắm thuận tiện." name="description"/>
-    <link href="style.css" rel="stylesheet"/>
+    <link href="assets/css/store.css?v=20260810" rel="stylesheet"/>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet"/>
   </head>
   <body>

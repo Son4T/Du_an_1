@@ -6,6 +6,7 @@ $summary = nam_cart_summary($items);
 $notice = nam_cart_flash();
 require __DIR__ . '/includes/header.php';
 ?>
+<link rel="stylesheet" href="assets/css/store.css?v=20260810">
 <link rel="stylesheet" href="assets/css/cart.css">
 <style>
 .nam-cart{max-width:1100px;margin:36px auto;padding:0 20px}.nam-cart-grid{display:grid;grid-template-columns:1fr 320px;gap:22px}.nam-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:20px}.nam-cart-item{display:grid;grid-template-columns:78px 1fr 110px 110px 42px;gap:15px;align-items:center;padding:14px 0;border-bottom:1px solid #eee}.nam-cart-item img{width:78px;height:90px;object-fit:cover;border-radius:9px;background:#f3f4f6}.nam-qty{width:68px;padding:8px;border:1px solid #d1d5db;border-radius:7px}.nam-alert{padding:12px 14px;border-radius:9px;margin-bottom:16px}.nam-alert.success{background:#dcfce7;color:#166534}.nam-alert.error{background:#fee2e2;color:#991b1b}.nam-total{font-size:20px;font-weight:700}.nam-row{display:flex;justify-content:space-between;gap:12px;margin:12px 0}.nam-btn{display:inline-block;border:0;border-radius:8px;padding:10px 14px;background:#111827;color:#fff;font-weight:600;cursor:pointer}.nam-btn.secondary{background:#e5e7eb;color:#111827}.nam-btn.danger{background:#fee2e2;color:#b91c1c}.nam-empty{text-align:center;padding:45px 15px;color:#6b7280}@media(max-width:760px){.nam-cart-grid{grid-template-columns:1fr}.nam-cart-item{grid-template-columns:60px 1fr 70px}.nam-cart-item .nam-price,.nam-cart-item .nam-remove{grid-column:2}.nam-cart-item img{width:60px;height:70px}}

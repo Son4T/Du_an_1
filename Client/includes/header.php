@@ -9,7 +9,7 @@ $clientName = $_SESSION['client_name']
 $cartCount = 0;
 
 foreach ($_SESSION['cart'] ?? [] as $cartItem) {
-    $cartCount += (int) ($cartItem['quantity'] ?? 0);
+    $cartCount += (int) $cartItem;
 }
 
 $currentPage = basename($_SERVER['PHP_SELF']);

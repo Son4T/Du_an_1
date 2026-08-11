@@ -2,6 +2,7 @@
 require_once dirname(__DIR__) . '/Admin/config/bootstrap.php';
 require_once dirname(__DIR__) . '/Admin/models/ProductModel.php';
 require_once dirname(__DIR__) . '/Admin/models/CommentModel.php';
+require_once __DIR__ . '/includes/cart_helpers.php';
 $id=(int)($_GET['id']??0);
 $pm=new ProductModel($conn);
 $product=$pm->getProductWithVariants($id);
@@ -61,7 +62,7 @@ $available=array_values(array_filter($product['variants'],fn($v)=>(int)$v['stock
             </div>
             <hr style="border:0;border-top:1px solid #e2e8f0;margin:24px 0"/>
             <form action="add_to_cart.php" id="addCartForm" method="post">
-              <?= csrf_input() ?>
+              <?= nam_cart_csrf_input() ?>
               <input name="product_id" type="hidden" value="<?= $id ?>"/>
               <h4>Chọn màu và kích thước</h4>
               <div class="variant-grid">

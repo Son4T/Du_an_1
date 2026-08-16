@@ -1,0 +1,143 @@
+@import url('assets/css/store.css?v=12');
+
+.option-group {
+    margin: 18px 0
+}
+
+.option-group h4 span {
+    font-weight: 500;
+    color: #64748b
+}
+
+.color-options,
+.size-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px
+}
+
+.color-choice,
+.size-choice {
+    border: 1.5px solid #cbd5e1;
+    background: #fff;
+    border-radius: 10px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font: inherit;
+    transition: .18s
+}
+
+.color-choice {
+    display: flex;
+    align-items: center;
+    gap: 8px
+}
+
+.color-choice span {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1px solid #cbd5e1
+}
+
+.color-choice:hover,
+.size-choice:hover {
+    border-color: #111827
+}
+
+.color-choice.active,
+.size-choice.active {
+    border-color: #111827;
+    box-shadow: 0 0 0 2px #111827;
+    background: #f8fafc
+}
+
+.color-choice:disabled,
+.size-choice:disabled {
+    opacity: .35;
+    text-decoration: line-through;
+    cursor: not-allowed
+}
+
+.selection-status {
+    padding: 11px 13px;
+    border-radius: 9px;
+    background: #fff7ed;
+    color: #9a3412;
+    margin: 14px 0
+}
+
+.selection-status.ready {
+    background: #ecfdf5;
+    color: #047857
+}
+
+.detail-image img {
+    transition: opacity .2s ease
+}
+
+.option-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between
+}
+
+.option-heading h4 {
+    margin: 0 0 10px
+}
+
+.option-heading button {
+    border: 0;
+    background: transparent;
+    color: #e11d48;
+    font-weight: 600;
+    cursor: pointer
+}
+
+.selection-status {
+    display: flex;
+    align-items: center;
+    gap: 9px
+}
+
+.selected-variant-card {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: #e2e8f0;
+    border: 1px solid #e2e8f0;
+    border-radius: 11px;
+    overflow: hidden;
+    margin: 14px 0
+}
+
+.selected-variant-card>div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: #f8fafc;
+    padding: 11px 13px
+}
+
+.selected-variant-card small {
+    color: #64748b
+}
+
+.selected-variant-card strong {
+    font-size: 13px
+}
+
+.low-stock {
+    color: #dc2626
+}
+
+.detail-actions .btn:disabled {
+    opacity: .5;
+    cursor: not-allowed
+}
+
+@media(max-width:600px) {
+    .selected-variant-card {
+        grid-template-columns: 1fr
+    }
+}

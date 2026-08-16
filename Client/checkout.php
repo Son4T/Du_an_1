@@ -1,35 +1,173 @@
 <?php
-require_once __DIR__ . '/includes/cart_helpers.php';
-require_once dirname(__DIR__) . '/Admin/config/database.php';
-$items = nam_cart_items($conn);
-if (!$items) {
-    nam_cart_flash('Giỏ hàng đang trống, chưa thể thanh toán.', 'error');
-    nam_cart_redirect('cart.php');
+require_once dirname(__DIR__) . '/Admin/config/bootstrap.php';
+require_once dirname(__DIR__) . '/Admin/models/ProductModel.php';
+require_once dirname(__DIR__) . '/Admin/models/UserModel.php';
+require_client('login.php');
+$cart = $_SESSION['cart'] ?? [];
+if (!$cart) {
+    flash('client', 'Giỏ hàng đang trống.', 'error');
+    redirect('cart.php');
 }
-$summary = nam_cart_summary($items);
-$user = ['full_name' => '', 'phone' => '', 'email' => '', 'address' => ''];
-if ($userId = nam_cart_current_user_id()) {
-    $statement = $conn->prepare('SELECT full_name, phone, email, address FROM users WHERE id = ?');
-    $statement->bind_param('i', $userId);
-    $statement->execute();
-    $user = $statement->get_result()->fetch_assoc() ?: $user;
+$productModel = new ProductModel($conn);
+$user = (new UserModel($conn))->find((int) $_SESSION['client_user_id']);
+if (!$user || $user['status'] !== 'active') {
+    unset($_SESSION['client_user_id'], $_SESSION['client_username'], $_SESSION['client_name']);
+    flash('auth', 'Tài khoản không còn khả dụng. Vui lòng đăng nhập lại.', 'error');
+    redirect('login.php');
 }
-require __DIR__ . '/includes/header.php';
+$items = [];
+$subtotal = 0;
+foreach ($cart as $row) {
+    $productId = (int) ($row['product_id'] ?? 0);
+    $variantId = (int) ($row['variant_id'] ?? 0);
+    $quantity = (int) ($row['quantity'] ?? 0);
+    $product = $productModel->getProductById($productId, true);
+    $variant = $productModel->getVariantById($variantId);
+    if ( !$product || !$variant || (int) $variant['product_id'] !== $productId || $variant['product_status'] !== 'Hiện' || $quantity < 1 || $quantity > (int) $variant['stock'] ) {
+        flash('client', 'Một sản phẩm đã hết hàng hoặc thay đổi tồn kho. Vui lòng kiểm tra lại giỏ.', 'error');
+        redirect('cart.php');
+    }
+    $price = (float) $product['sale_price'] > 0 ? (float) $product['sale_price'] : (float) $variant['price'];
+    $lineTotal = $price * $quantity;
+    $subtotal += $lineTotal;
+    $items[] = [ 'product' => $product, 'variant' => $variant, 'quantity' => $quantity, 'line' => $lineTotal, ];
+}
+$shippingFee = shipping_fee($subtotal);
+$notice = flash('client');
 ?>
-<style>
-.nam-checkout{max-width:1050px;margin:36px auto;padding:0 20px}.nam-checkout-grid{display:grid;grid-template-columns:1fr 340px;gap:22px}.nam-box{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:22px}.nam-field{margin:13px 0}.nam-field label{display:block;font-weight:600;margin-bottom:6px}.nam-field input,.nam-field textarea,.nam-field select{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px;font:inherit}.nam-summary-item{padding:11px 0;border-bottom:1px solid #eee;display:flex;justify-content:space-between;gap:10px}.nam-total-line{font-size:20px;font-weight:700;display:flex;justify-content:space-between;margin-top:17px}.nam-submit{background:#111827;border:0;border-radius:8px;color:#fff;padding:12px 17px;font-weight:700;cursor:pointer;width:100%;margin-top:20px}@media(max-width:760px){.nam-checkout-grid{grid-template-columns:1fr}}
-</style>
-<section class="nam-checkout"><h1>Thanh toán</h1><div class="nam-checkout-grid">
-  <form class="nam-box" method="post" action="place_order.php">
-    <?= nam_cart_csrf_input() ?><h2>Thông tin nhận hàng</h2>
-    <div class="nam-field"><label>Họ và tên *</label><input required minlength="2" name="customer_name" value="<?= nam_cart_e($user['full_name']) ?>"></div>
-    <div class="nam-field"><label>Số điện thoại *</label><input required name="phone" pattern="[0-9+ ]{9,20}" value="<?= nam_cart_e($user['phone']) ?>"></div>
-    <div class="nam-field"><label>Email</label><input name="email" type="email" value="<?= nam_cart_e($user['email']) ?>"></div>
-    <div class="nam-field"><label>Địa chỉ nhận hàng *</label><textarea required minlength="10" name="address" rows="3"><?= nam_cart_e($user['address']) ?></textarea></div>
-    <div class="nam-field"><label>Ghi chú</label><textarea name="note" maxlength="1000" rows="3" placeholder="Ví dụ: giao giờ hành chính"></textarea></div>
-    <div class="nam-field"><label>Phương thức thanh toán</label><select name="payment_method"><option value="cod">Thanh toán khi nhận hàng (COD)</option></select></div>
-    <button class="nam-submit">Đặt hàng · <?= nam_cart_money($summary['total']) ?></button>
-  </form>
-  <aside class="nam-box"><h2>Đơn hàng của bạn</h2><?php foreach ($items as $item): ?><div class="nam-summary-item"><span><?= nam_cart_e($item['product_name']) ?><br><small><?= nam_cart_e($item['variant_label']) ?> × <?= (int) $item['quantity'] ?></small></span><strong><?= nam_cart_money($item['line_total']) ?></strong></div><?php endforeach; ?><div class="nam-summary-item"><span>Phí vận chuyển</span><strong><?= nam_cart_money($summary['shipping']) ?></strong></div><div class="nam-total-line"><span>Tổng cộng</span><span><?= nam_cart_money($summary['total']) ?></span></div></aside>
-</div></section>
-<?php require __DIR__ . '/includes/footer.php'; ?>
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+    <title>
+      Thanh toán -
+      <?= e(STORE_NAME) ?>
+    </title>
+    <link href="style.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet"/>
+  </head>
+  <body>
+    <?php include 'includes/header.php'; ?>
+    <section class="page-hero">
+      <div class="container">
+        <h1>Thanh toán</h1>
+        <p>Nhập chính xác thông tin để cửa hàng giao hàng cho bạn.</p>
+      </div>
+    </section>
+    <main class="section alt">
+      <div class="container">
+        <?php if ($notice): ?>
+        <div class="alert alert-<?= e($notice['type']) ?>">
+          <?= e($notice['message']) ?>
+        </div>
+        <?php endif; ?>
+        <form action="place_order.php" class="checkout-layout" id="checkoutForm" method="post">
+          <section class="card">
+            <?= csrf_input() ?>
+            <h2>Thông tin nhận hàng</h2>
+            <div class="form-grid">
+              <div class="field">
+                <label>Họ và tên *</label>
+                <input autocomplete="name" maxlength="120" minlength="2" name="customer_name" required="" value="<?= e($user['full_name']) ?>"/>
+              </div>
+              <div class="field">
+                <label>Số điện thoại *</label>
+                <input autocomplete="tel" inputmode="numeric" maxlength="10" name="phone" pattern="0[0-9]{9}" required="" value="<?= e($user['phone']) ?>"/>
+              </div>
+              <div class="field full">
+                <label>Email *</label>
+                <input autocomplete="email" maxlength="120" name="email" required="" type="email" value="<?= e($user['email']) ?>"/>
+              </div>
+              <div class="field">
+                <label>Tỉnh/Thành phố *</label>
+                <input autocomplete="address-level1" maxlength="100" name="province" placeholder="Hà Nội" required=""/>
+              </div>
+              <div class="field">
+                <label>Quận/Huyện *</label>
+                <input autocomplete="address-level2" maxlength="100" name="district" required=""/>
+              </div>
+              <div class="field">
+                <label>Phường/Xã *</label>
+                <input autocomplete="address-level3" maxlength="100" name="ward" required=""/>
+              </div>
+              <div class="field">
+                <label>Số nhà, tên đường *</label>
+                <input autocomplete="street-address" maxlength="200" name="address_detail" required="" value="<?= e($user['address']) ?>"/>
+              </div>
+              <div class="field full">
+                <label>Ghi chú</label>
+                <textarea maxlength="1000" name="note" placeholder="Thời gian nhận hàng, yêu cầu đóng gói..." rows="3"></textarea>
+              </div>
+            </div>
+            <h2>Phương thức thanh toán</h2>
+
+            <label class="payment-option">
+              <input
+                checked
+                name="payment_method"
+                type="radio"
+                value="cod"
+              />
+
+              <span class="payment-content">
+                <strong>Thanh toán khi nhận hàng (COD)</strong>
+                <small class="text-muted">
+                  Thanh toán tiền mặt cho nhân viên giao hàng.
+                </small>
+              </span>
+            </label>
+
+            <label class="payment-option">
+              <input
+                name="payment_method"
+                type="radio"
+                value="zalopay"
+              />
+
+              <span class="payment-content">
+                <strong>Thanh toán ZaloPay Sandbox bằng QR</strong>
+                <small class="text-muted">
+                  ZaloPay Sandbox tạo QR đúng số tiền. Website tự kiểm tra
+                  và cập nhật “Đã thanh toán” sau giao dịch.
+                </small>
+              </span>
+            </label>
+            <button class="btn btn-primary" style="width:100%;margin-top:18px" type="submit">Đặt hàng</button>
+          </section>
+          <aside class="card" style="height:max-content">
+            <h3>Đơn hàng của bạn</h3>
+            <?php foreach ($items as $item): ?>
+            <div class="summary-line">
+              <span>
+                <?= e($item['product']['name']) ?>
+                <br/>
+                <small>
+                  <?= e($item['variant']['color_name'] . ' / ' . $item['variant']['size_name']) ?>
+                  ×
+                  <?= (int) $item['quantity'] ?>
+                </small>
+              </span>
+              <strong><?= money($item['line']) ?></strong>
+            </div>
+            <?php endforeach; ?>
+            <hr style="border:0;border-top:1px solid #e2e8f0"/>
+            <div class="summary-line">
+              <span>Tạm tính</span>
+              <strong><?= money($subtotal) ?></strong>
+            </div>
+            <div class="summary-line">
+              <span>Vận chuyển</span>
+              <strong><?= money($shippingFee) ?></strong>
+            </div>
+            <div class="summary-line total">
+              <strong>Tổng cộng</strong>
+              <strong class="text-danger"><?= money($subtotal + $shippingFee) ?></strong>
+            </div>
+          </aside>
+        </form>
+      </div>
+    </main>
+    <?php include 'includes/footer.php'; ?>
+  </body>
+</html>

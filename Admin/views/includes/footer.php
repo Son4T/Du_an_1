@@ -50,7 +50,7 @@
 
         <div class="copyright">
             © <?= date('Y') ?> <?= e(STORE_NAME) ?>.
-            Dự án 1 – Lập trình website.
+            Phong cách của riêng bạn.
         </div>
     </div>
 </footer>

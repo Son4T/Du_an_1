@@ -5,11 +5,12 @@ $isLoggedIn = !empty($_SESSION['client_user_id']);
 $clientName = $_SESSION['client_name']
     ?? $_SESSION['client_username']
     ?? 'Tài khoản';
+$clientAvatar = $_SESSION['client_avatar'] ?? '';
 
 $cartCount = 0;
 
 foreach ($_SESSION['cart'] ?? [] as $cartItem) {
-    $cartCount += (int) $cartItem;
+    $cartCount += (int) ($cartItem['quantity'] ?? 0);
 }
 
 $currentPage = basename($_SERVER['PHP_SELF']);
@@ -68,11 +69,24 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             <?php if ($isLoggedIn): ?>
             <div class="user-dropdown">
                 <button class="header-icon" title="<?= e($clientName) ?>" type="button">
-                    <i class="fa-solid fa-user"></i>
+                    <?php if ($clientAvatar !== ''): ?>
+                    <img src="<?= e(avatar_image_url($clientAvatar, '../')) ?>" alt="<?= e($clientName) ?>"
+                        style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #fff;box-shadow:0 0 0 1px #e2e8f0">
+                    <?php else: ?>
+                    <span
+                        style="font-size:13px;font-weight:800;color:#be123c"><?= e(mb_substr($clientName, 0, 1)) ?></span>
+                    <?php endif; ?>
                 </button>
 
                 <div class="dropdown-menu">
-                    <div style="padding: 9px 10px">
+                    <div style="padding:9px 10px;display:flex;align-items:center;gap:10px">
+                        <?php if ($clientAvatar !== ''): ?>
+                        <img src="<?= e(avatar_image_url($clientAvatar, '../')) ?>" alt=""
+                            style="width:34px;height:34px;border-radius:50%;object-fit:cover">
+                        <?php else: ?>
+                        <span
+                            style="width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#fff1f2;color:#be123c;font-weight:800"><?= e(mb_substr($clientName, 0, 1)) ?></span>
+                        <?php endif; ?>
                         <strong><?= e($clientName) ?></strong>
                     </div>
 
